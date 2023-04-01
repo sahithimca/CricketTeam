@@ -9,26 +9,22 @@ const dbPath = path.join(__dirname, "cricketTeam.db");
 
 let  dbObject = null;
 
-const convertDbObjectToResponseObject = (dbObject) => {
-  return {
-    playerId: dbObject.player_id,
-    playerName: dbObject.player_name,
-    jerseyNumber: dbObject.jersey_number,
-    role: dbObject.role,
-  };
-};
-
-    app.listen(3000, () => {
-      console.log("Server Running at http://localhost:3000/");
+const initializeDbAndServer = async () => {
+  try {
+    database = await open({
+      filename: databasePath,
+      driver: sqlite3.Database,
     });
-} catch (e) {
-    console.log(`DB Error: ${e.message}`);
+    app.listen(3000, () =>
+      console.log("Server Running at http://localhost:3000/")
+    );
+  } catch (error) {
+    console.log(`DB Error: ${error.message}`);
     process.exit(1);
   }
 };
 
-
-initializeDBAndServer();
+initializeDbAndServer();
 
 app.get("/players/:playerId/", async (request, response) => {
 const getPlayersQuery = `
@@ -53,7 +49,7 @@ app.post("/players/", async (request, response) => {
   } = playerDetails;
   const addPlayerQuery = `
     INSERT INTO
-      book (playerName,
+      player (playerName,
     jerseyNumber
     role,)
     VALUES
@@ -95,9 +91,9 @@ app.delete("/players/:playerId/", async (request, response) => {
   const { playerId } = request.params;
   const deletePlayerQuery = `
     DELETE FROM
-      book
+      player
     WHERE
-      book_id = ${playerId};`;
+      player_id = ${playerId};`;
   await db.run(deletePlayerQuery);
   response.send("Player Deleted Successfully");
 });
